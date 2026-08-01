@@ -1,5 +1,11 @@
 # HDCVT HDMI Matrix - Home Assistant Custom Integration
 
+Based on https://github.com/taysuus/hass-orei_matrix
+
+The original repo works on other HDCVT rebranded HDMI Matrix such as Monoprice.
+
+This fork is made to support other HDCVT OEM branded HDMI Matrix.
+
 Control your **HDCVT HDMI Matrix** switch directly from **Home Assistant** via Telnet.
 
 Supports power control, input/output switching, live state updates, and manual refresh.  
