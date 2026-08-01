@@ -1,0 +1,5 @@
+{
+  "name": "HDCVT Matrix",
+  "domains": ["media_player", "switch"],
+  "render_readme": true
+}
