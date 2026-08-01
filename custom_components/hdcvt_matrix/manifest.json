@@ -4,8 +4,8 @@
   "version": "1.0.1",
   "integration_type": "device",
   "requirements": [],
-  "documentation": "https://github.com/taysuus/hass-hdcvt_matrix",
-  "codeowners": ["@taysuus"],
+  "documentation": "https://github.com/warheat1990/hass-hdcvt-matrix",
+  "codeowners": ["@warheat1990"],
   "iot_class": "local_polling",
   "config_flow": true
 }

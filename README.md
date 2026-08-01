@@ -1,6 +1,6 @@
 # HDCVT HDMI Matrix - Home Assistant Custom Integration
 
-Based on https://github.com/taysuus/hass-orei_matrix
+Based on https://github.com/taysuus/hass-orei-matrix
 
 The original repo works on other HDCVT rebranded HDMI Matrix such as Monoprice.
 
@@ -44,7 +44,7 @@ When configured, you’ll see a single device in Home Assistant:
 ### 🧩 HACS (Recommended)
 
 1. Go to **HACS → Integrations → Custom Repositories**
-2. Add this repository URL https://github.com/taysuus/hass-hdcvt-matrix as type **Integration**
+2. Add this repository URL https://github.com/warheat1990/hass-hdcvt-matrix as type **Integration**
 3. Search for **HDCVT HDMI Matrix** and install it.
 4. Restart Home Assistant.
 
