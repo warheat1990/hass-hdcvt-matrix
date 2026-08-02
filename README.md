@@ -1,15 +1,15 @@
-Based on https://github.com/Dresdn/hass-orei_matrix (fork of https://github.com/taysuus/hass-orei_matrix)
+Based on https://github.com/Dresdn/hass-hdcvt_matrix (fork of https://github.com/taysuus/hass-hdcvt_matrix)
 
 The original repo works on other HDCVT rebranded HDMI Matrix such as Monoprice.
 
 This fork is made to support other HDCVT OEM branded HDMI Matrix but it will be focused on HDP-MXB44P as that is what I have.
 
-# Orei HDMI Matrix - Home Assistant Custom Integration
+# HDCVT HDMI Matrix - Home Assistant Custom Integration
 
-Control your **Orei HDMI Matrix** switch directly from **Home Assistant** via Telnet.
+Control your **HDCVT HDMI Matrix** switch directly from **Home Assistant** via Telnet.
 
 Supports power control, input/output switching, live state updates, and manual refresh.
-Compatible with multiple Orei models such as **UHD48-EX230-K**, etc.
+Compatible with multiple HDCVT models such as **UHD48-EX230-K**, etc.
 
 ---
 
@@ -19,11 +19,11 @@ Compatible with multiple Orei models such as **UHD48-EX230-K**, etc.
 - 🔌 **Global power control** (on/off)
 - 🎛 **Per-output source selection** as media players
 - ⚡ **Comprehensive services** for power, routing, and CEC control
-- 🔄 **Manual refresh service** (`orei_matrix.refresh`)
+- 🔄 **Manual refresh service** (`hdcvt_matrix.refresh`)
 - 🧩 **Dynamic device grouping** (all entities under one device)
 - 🪄 **Config Flow setup** (no YAML required)
 - 🔍 **Auto-discovery** of inputs and outputs
-- 🧰 **Support for 4x4, 8x8, and other Orei matrix models**
+- 🧰 **Support for 4x4, 8x8, and other HDCVT matrix models**
 
 ---
 
@@ -31,9 +31,9 @@ Compatible with multiple Orei models such as **UHD48-EX230-K**, etc.
 
 When configured, you’ll see a single device in Home Assistant:
 
-> **Orei UHD48-EX230-K**
+> **HDCVT UHD48-EX230-K**
 >
-> - 🔌 `switch.orei_matrix_power`
+> - 🔌 `switch.hdcvt_matrix_power`
 > - 🎚 `media_player.living_room`
 > - 🎚 `media_player.bedroom`
 > - 🎚 `media_player.office`
@@ -46,13 +46,13 @@ When configured, you’ll see a single device in Home Assistant:
 ### 🧩 HACS (Recommended)
 
 1. Go to **HACS → Integrations → Custom Repositories**
-2. Add this repository URL https://github.com/taysuus/hass-orei-matrix as type **Integration**
-3. Search for **Orei HDMI Matrix** and install it.
+2. Add this repository URL https://github.com/taysuus/hass-hdcvt-matrix as type **Integration**
+3. Search for **HDCVT HDMI Matrix** and install it.
 4. Restart Home Assistant.
 
 ### 📦 Manual
 
-1. Copy the `custom_components/orei_matrix` folder into: <config>/custom_components/orei_matrix/
+1. Copy the `custom_components/hdcvt_matrix` folder into: <config>/custom_components/hdcvt_matrix/
 2. Restart Home Assistant.
 
 ---
@@ -62,10 +62,10 @@ When configured, you’ll see a single device in Home Assistant:
 Set up via the **Home Assistant UI**:
 
 1. Go to **Settings → Devices & Services → Add Integration**
-2. Search for **Orei HDMI Matrix**
+2. Search for **HDCVT HDMI Matrix**
 3. Enter:
 
-- **Host** (IP of your Orei Matrix)
+- **Host** (IP of your HDCVT Matrix)
 - **Port** (default: 23)
 - **Source Names** (e.g. `"Apple TV"`, `"Blu-ray"`, `"PC"`, `"Game Console"`)
 - **Zone Names** (e.g. `"Living Room"`, `"Bedroom"`, `"Patio"`, `"Office"`)
@@ -78,7 +78,7 @@ That’s it — entities will be created automatically.
 
 | Entity Type                | Count | Description                                          |
 | -------------------------- | ----- | ---------------------------------------------------- |
-| `switch.orei_matrix_power` | 1     | Controls main matrix power                           |
+| `switch.hdcvt_matrix_power` | 1     | Controls main matrix power                           |
 | `switch.<input_name>`      | 8     | CEC control for each input device                    |
 | `media_player.<output>`    | 8     | Represents each output (allows source selection)     |
 
@@ -100,22 +100,22 @@ Each input switch shows:
 
 ### Power Control
 
-- `orei_matrix.power_on_output` - Power on a TV/display and set as active source
-- `orei_matrix.power_off_output` - Power off a TV/display
-- `orei_matrix.set_output_active` - Tell TV to switch to matrix input
-- `orei_matrix.power_on_input` - Power on a source device (Apple TV, Xbox, etc)
-- `orei_matrix.power_off_input` - Power off a source device
-- `orei_matrix.power_on_all_outputs` - Power on all displays
-- `orei_matrix.power_off_all_outputs` - Power off all displays
+- `hdcvt_matrix.power_on_output` - Power on a TV/display and set as active source
+- `hdcvt_matrix.power_off_output` - Power off a TV/display
+- `hdcvt_matrix.set_output_active` - Tell TV to switch to matrix input
+- `hdcvt_matrix.power_on_input` - Power on a source device (Apple TV, Xbox, etc)
+- `hdcvt_matrix.power_off_input` - Power off a source device
+- `hdcvt_matrix.power_on_all_outputs` - Power on all displays
+- `hdcvt_matrix.power_off_all_outputs` - Power off all displays
 
 ### Routing Control
 
-- `orei_matrix.route_input_to_output` - Route specific input to specific output
-- `orei_matrix.route_input_to_outputs` - Route input to multiple outputs
+- `hdcvt_matrix.route_input_to_output` - Route specific input to specific output
+- `hdcvt_matrix.route_input_to_outputs` - Route input to multiple outputs
 
 ### System
 
-- `orei_matrix.refresh` - Manually refresh matrix state
+- `hdcvt_matrix.refresh` - Manually refresh matrix state
 
 ### Example: Movie Night Automation
 
@@ -127,7 +127,7 @@ automation:
         at: "20:00:00"
     action:
       # Power on living room TV
-      - service: orei_matrix.power_on_output
+      - service: hdcvt_matrix.power_on_output
         data:
           output: 1
 

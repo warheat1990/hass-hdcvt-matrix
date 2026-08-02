@@ -14,7 +14,7 @@ from .const import (
     CONF_ZONES,
     DOMAIN,
 )
-from .coordinator import OreiMatrixClient
+from .coordinator import HDCVTMatrixClient
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -38,7 +38,7 @@ async def validate_input(hass, data):
     """
     host = data[CONF_HOST]
     port = data.get(CONF_PORT, 23)
-    client = OreiMatrixClient(host, port)
+    client = HDCVTMatrixClient(host, port)
 
     try:
         await client.connect()
@@ -68,15 +68,15 @@ async def validate_input(hass, data):
         )
 
     return {
-        "title": f"Orei {device_type}",
+        "title": f"HDCVT {device_type}",
         "type": device_type,
         "input_count": status["input_count"],
         "output_count": status["output_count"],
     }
 
 
-class OreiMatrixConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
-    """Handle Orei HDMI Matrix config flow."""
+class HDCVTMatrixConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
+    """Handle HDCVT HDMI Matrix config flow."""
 
     VERSION = 1
 
@@ -134,7 +134,7 @@ class OreiMatrixConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     @staticmethod
     def async_get_options_flow(config_entry):
         """Get the options flow for this handler."""
-        return OreiMatrixOptionsFlow()
+        return HDCVTMatrixOptionsFlow()
 
     async def async_step_user(self, user_input=None):
         """Handle initial connection setup - IP and port only."""
@@ -224,8 +224,8 @@ class OreiMatrixConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         )
 
 
-class OreiMatrixOptionsFlow(config_entries.OptionsFlow):
-    """Handle options flow for Orei HDMI Matrix."""
+class HDCVTMatrixOptionsFlow(config_entries.OptionsFlow):
+    """Handle options flow for HDCVT HDMI Matrix."""
 
     async def async_step_init(self, user_input=None):
         """Manage the options."""
@@ -254,7 +254,7 @@ class OreiMatrixOptionsFlow(config_entries.OptionsFlow):
                     errors["base"] = "unknown"
                     description_placeholders["error_detail"] = str(err)
             else:
-                new_title = f"Orei HDMI Matrix ({new_host})"
+                new_title = f"HDCVT HDMI Matrix ({new_host})"
 
             if not errors:
                 # Update config entry with new data AND title

@@ -10,7 +10,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 async def async_setup_entry(hass, entry, async_add_entities):
-    """Set up Orei HDMI Matrix buttons."""
+    """Set up HDCVT HDMI Matrix buttons."""
     data = hass.data[DOMAIN][entry.entry_id]
     client = data["client"]
     coordinator = data["coordinator"]
@@ -24,12 +24,12 @@ async def async_setup_entry(hass, entry, async_add_entities):
     # Create explicit power on/off buttons for each output
     for idx, output_name in enumerate(outputs, start=1):
         entities.append(
-            OreiMatrixOutputPowerButton(
+            HDCVTMatrixOutputPowerButton(
                 client, coordinator, output_name, idx, entry.entry_id, "on"
             )
         )
         entities.append(
-            OreiMatrixOutputPowerButton(
+            HDCVTMatrixOutputPowerButton(
                 client, coordinator, output_name, idx, entry.entry_id, "off"
             )
         )
@@ -37,7 +37,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
     async_add_entities(entities)
 
 
-class OreiMatrixOutputPowerButton(CoordinatorEntity, ButtonEntity):
+class HDCVTMatrixOutputPowerButton(CoordinatorEntity, ButtonEntity):
     """Button to send explicit CEC power commands to an output."""
 
     def __init__(
@@ -71,11 +71,11 @@ class OreiMatrixOutputPowerButton(CoordinatorEntity, ButtonEntity):
     def device_info(self) -> DeviceInfo:
         """Device info for grouping under the matrix."""
         model = self.coordinator.data.get("type", "Unknown")
-        name = f"Orei {model}" if model != "Unknown" else "Orei HDMI Matrix"
+        name = f"HDCVT {model}" if model != "Unknown" else "HDCVT HDMI Matrix"
         return DeviceInfo(
             identifiers={(DOMAIN, self._entry_id)},
             name=name,
-            manufacturer="OREI",
+            manufacturer="HDCVT",
             model=model,
             configuration_url=f"http://{self._host}",
         )
