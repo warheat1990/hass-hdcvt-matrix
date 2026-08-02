@@ -1,70 +1,99 @@
-from homeassistant.components.button import ButtonEntity
-from homeassistant.core import callback
-from homeassistant.helpers.update_coordinator import CoordinatorEntity
-from .const import DOMAIN
 import logging
+
+from homeassistant.components.button import ButtonEntity
+from homeassistant.helpers.device_registry import DeviceInfo
+from homeassistant.helpers.update_coordinator import CoordinatorEntity
+
+from .const import CONF_OUTPUTS, CONF_ZONES, DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
+
 async def async_setup_entry(hass, entry, async_add_entities):
-    """Set up HDCVT Matrix outputs as buttons."""
+    """Set up Orei HDMI Matrix buttons."""
     data = hass.data[DOMAIN][entry.entry_id]
     client = data["client"]
     coordinator = data["coordinator"]
     config = data["config"]
-    zones = config.get("zones", [])
-    entities = [
-        HDCVTMatrixOutputButton(client, coordinator, config, f"{zone_name} next source", idx, entry.entry_id)
-        for idx, zone_name in enumerate(zones, start=1)
-    ]
+
+    # Support both new (outputs) and old (zones) format
+    outputs = config.get(CONF_OUTPUTS, config.get(CONF_ZONES, []))
+
+    entities = []
+
+    # Create explicit power on/off buttons for each output
+    for idx, output_name in enumerate(outputs, start=1):
+        entities.append(
+            OreiMatrixOutputPowerButton(
+                client, coordinator, output_name, idx, entry.entry_id, "on"
+            )
+        )
+        entities.append(
+            OreiMatrixOutputPowerButton(
+                client, coordinator, output_name, idx, entry.entry_id, "off"
+            )
+        )
 
     async_add_entities(entities)
 
 
-class HDCVTMatrixOutputButton(CoordinatorEntity, ButtonEntity):
-    """Represents one HDCVT matrix output as a button to cycle sources."""
+class OreiMatrixOutputPowerButton(CoordinatorEntity, ButtonEntity):
+    """Button to send explicit CEC power commands to an output."""
 
-    def __init__(self, client, coordinator, config, name, output_id, entry_id):
+    def __init__(
+        self, client, coordinator, output_name, output_id, entry_id, command_type
+    ):
+        """Initialize the button."""
         super().__init__(coordinator)
-        sources = config.get("sources", [])
         self._client = client
-        self._config = config
-        self._attr_name = name
         self._output_id = output_id
-        self._sources = sources
-        self._current = None
         self._entry_id = entry_id
-        self._attr_unique_id = f"{DOMAIN}_{config.get('host')}_{output_id}_next_source"
+        self._command_type = command_type
+        self._host = coordinator.config_entry.data.get("host")
+
+        # Use entry_id for stable unique ID
+        self._attr_unique_id = f"{entry_id}_output_{output_id}_power_{command_type}"
+
+        # Set friendly name
+        cmd_name = "Power On" if command_type == "on" else "Power Off"
+        self._attr_name = f"{output_name} {cmd_name}"
+        self._attr_has_entity_name = True
+
+        # Set icons
+        self._attr_icon = "mdi:power-on" if command_type == "on" else "mdi:power-off"
 
     @property
-    def device_info(self):
-        """Device info for grouping and model-based naming."""
+    def available(self):
+        """Entity availability based on matrix power."""
+        return bool(self.coordinator.data.get("power"))
+
+    @property
+    def device_info(self) -> DeviceInfo:
+        """Device info for grouping under the matrix."""
         model = self.coordinator.data.get("type", "Unknown")
-        name = f"HDCVT {model}" if model != "Unknown" else "HDCVT HDMI Matrix"
-        return {
-            "identifiers": {(DOMAIN, self._entry_id)},
-            "name": name,
-            "manufacturer": "HDCVT",
-            "model": model,
-            "configuration_url": f"http://{self._config.get('host')}",
-        }
-        
-    @callback
-    def _handle_coordinator_update(self):
-        outputs = self.coordinator.data.get("outputs")
-        if not outputs:
-            return
-        self._current = outputs[self._output_id]
-        self.async_write_ha_state()
-    
+        name = f"Orei {model}" if model != "Unknown" else "Orei HDMI Matrix"
+        return DeviceInfo(
+            identifiers={(DOMAIN, self._entry_id)},
+            name=name,
+            manufacturer="OREI",
+            model=model,
+            configuration_url=f"http://{self._host}",
+        )
+
     async def async_press(self) -> None:
         """Handle the button press."""
-        if self._current == None:
-            _LOGGER.warning("Current input is unknown; cannot change source for %s.", self.name)
+        if not self.available:
+            _LOGGER.warning("Matrix is off; cannot control output %d", self._output_id)
             return
-        
-        input_id = (self._current % len(self._sources)) + 1
-        source = self._sources[input_id - 1]
-        await self._client.set_output_source(input_id, self._output_id)
-        await self.coordinator.async_request_refresh()
-        _LOGGER.info("Switched %s to %s", self.name, source)
+
+        # Send CEC command
+        await self._client.set_cec_out(self._output_id, self._command_type)
+
+        # If powering on, also set as active source
+        if self._command_type == "on":
+            await self._client.set_output_active(self._output_id)
+            _LOGGER.info(
+                "Powered on output %d and set as active source", self._output_id
+            )
+        else:
+            _LOGGER.info("Powered off output %d", self._output_id)
